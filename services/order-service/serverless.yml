@@ -1,0 +1,92 @@
+service: order-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: go1.x
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 30
+  
+  environment:
+    DB_HOST: 
+      Fn::ImportValue: product-service-${self:provider.stage}-aurora-endpoint
+    DB_PORT: 5432
+    DB_NAME: supermarket_${self:provider.stage}
+    DB_USER: ${env:DB_USER, 'postgres'}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - rds:DescribeDBClusters
+            - rds:DescribeDBInstances
+          Resource: "*"
+
+functions:
+  orderApi:
+    handler: bin/main
+    vpc:
+      securityGroupIds:
+        - Fn::ImportValue: product-service-${self:provider.stage}-lambda-sg
+      subnetIds:
+        - Fn::ImportValue: product-service-${self:provider.stage}-subnet-a
+        - Fn::ImportValue: product-service-${self:provider.stage}-subnet-b
+    events:
+      - http:
+          path: /orders
+          method: get
+          cors: true
+      - http:
+          path: /orders
+          method: post
+          cors: true
+      - http:
+          path: /orders/{id}
+          method: get
+          cors: true
+      - http:
+          path: /orders/{id}
+          method: put
+          cors: true
+      - http:
+          path: /orders/{id}/cancel
+          method: post
+          cors: true
+      - http:
+          path: /orders/{id}/status
+          method: put
+          cors: true
+      - http:
+          path: /orders/user/{userId}
+          method: get
+          cors: true
+
+package:
+  individually: true
+  patterns:
+    - '!./**'
+    - bin/main
+
+resources:
+  Outputs:
+    OrderServiceApiUrl:
+      Description: "API Gateway URL for Order Service"
+      Value:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Ref: ApiGatewayRestApi
+            - ".execute-api."
+            - ${self:provider.region}
+            - ".amazonaws.com/"
+            - ${self:provider.stage}
+      Export:
+        Name: ${self:service}-${self:provider.stage}-api-url
+
+plugins:
+  - serverless-go-plugin
