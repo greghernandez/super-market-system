@@ -154,7 +154,7 @@ func (h *LambdaHandler) getProduct(request events.APIGatewayProxyRequest, header
 
 func (h *LambdaHandler) createProduct(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
 	var createRequest models.CreateProductRequest
-	
+
 	if err := json.Unmarshal([]byte(request.Body), &createRequest); err != nil {
 		return h.errorResponse(http.StatusBadRequest, "Invalid JSON payload", headers), nil
 	}
@@ -178,7 +178,7 @@ func (h *LambdaHandler) updateProduct(request events.APIGatewayProxyRequest, hea
 	}
 
 	var updateRequest models.UpdateProductRequest
-	
+
 	if err := json.Unmarshal([]byte(request.Body), &updateRequest); err != nil {
 		return h.errorResponse(http.StatusBadRequest, "Invalid JSON payload", headers), nil
 	}
@@ -233,7 +233,7 @@ func (h *LambdaHandler) updateStock(request events.APIGatewayProxyRequest, heade
 	var stockRequest struct {
 		Quantity int `json:"quantity" validate:"required"`
 	}
-	
+
 	if err := json.Unmarshal([]byte(request.Body), &stockRequest); err != nil {
 		return h.errorResponse(http.StatusBadRequest, "Invalid JSON payload", headers), nil
 	}

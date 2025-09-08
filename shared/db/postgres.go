@@ -31,7 +31,7 @@ func DefaultConfig() *Config {
 		User:            getEnvOrDefault("DB_USER", "postgres"),
 		Password:        getEnvOrDefault("DB_PASSWORD", ""),
 		Database:        getEnvOrDefault("DB_NAME", "supermarket"),
-		SSLMode:         "disable", // getEnvOrDefault("DB_SSL_MODE", "require"),
+		SSLMode:         getEnvOrDefault("DB_SSL_MODE", "require"),
 		MaxOpenConns:    25,
 		MaxIdleConns:    5,
 		ConnMaxLifetime: time.Hour,
@@ -80,9 +80,12 @@ func NewPostgresConnectionFromEnv() (*gorm.DB, error) {
 }
 
 // AutoMigrate runs auto migration for the given models
-func AutoMigrate(db *gorm.DB, models ...interface{}) error {
-	return db.AutoMigrate(models...)
-}
+// func AutoMigrate(db *gorm.DB, models ...interface{}) error {
+// 	if len(models) == 0 {
+// 		return nil
+// 	}
+// 	return db.AutoMigrate(models...)
+// }
 
 // getEnvOrDefault returns environment variable value or default if not set
 func getEnvOrDefault(key, defaultValue string) string {

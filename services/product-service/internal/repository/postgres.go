@@ -22,11 +22,11 @@ func NewPostgresRepository() (*PostgresRepository, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Auto-migrate the schema
-	err = db.AutoMigrate(database, &models.Product{}, &models.Category{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to migrate database: %w", err)
-	}
+	// // Auto-migrate the schema
+	// err = db.AutoMigrate(database, &models.Product{}, &models.Category{})
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to migrate database: %w", err)
+	// }
 
 	return &PostgresRepository{
 		BaseRepository: db.NewBaseRepository(database),
@@ -36,11 +36,11 @@ func NewPostgresRepository() (*PostgresRepository, error) {
 func (r *PostgresRepository) GetProduct(id string) (*models.Product, error) {
 	var product models.Product
 	result := r.DB.Where("id = ? AND is_active = ?", id, true).First(&product)
-	
+
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, errors.New("product not found")
 	}
-	
+
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to get product: %w", result.Error)
 	}
@@ -131,7 +131,7 @@ func (r *PostgresRepository) CreateProduct(product *models.Product) error {
 
 func (r *PostgresRepository) UpdateProduct(id string, updates *models.UpdateProductRequest) (*models.Product, error) {
 	var product models.Product
-	
+
 	// First get the existing product
 	result := r.DB.Where("id = ?", id).First(&product)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -143,7 +143,7 @@ func (r *PostgresRepository) UpdateProduct(id string, updates *models.UpdateProd
 
 	// Apply updates
 	updateFields := make(map[string]interface{})
-	
+
 	if updates.Name != nil {
 		updateFields["name"] = *updates.Name
 	}
@@ -245,7 +245,7 @@ func (r *PostgresRepository) UpdateStock(id string, quantity int) error {
 
 func (r *PostgresRepository) GetLowStockProducts() ([]models.Product, error) {
 	var products []models.Product
-	
+
 	result := r.DB.Where("stock <= min_stock AND is_active = ?", true).Find(&products)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to get low stock products: %w", result.Error)
