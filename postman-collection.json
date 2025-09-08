@@ -1,0 +1,751 @@
+{
+	"info": {
+		"_postman_id": "product-service-api",
+		"name": "Super Market System - Product Service",
+		"description": "Colección de API para el sistema de supermercado - Servicio de productos",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "super-market-system"
+	},
+	"item": [
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products?limit=10&offset=0&category_id=&brand=&search=&min_price=&max_price=&in_stock=&department_id=&is_on_sale=&min_rating=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de productos por página"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Número de productos a omitir"
+								},
+								{
+									"key": "category_id",
+									"value": "",
+									"description": "ID de categoría para filtrar"
+								},
+								{
+									"key": "brand",
+									"value": "",
+									"description": "Marca para filtrar"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Término de búsqueda"
+								},
+								{
+									"key": "min_price",
+									"value": "",
+									"description": "Precio mínimo"
+								},
+								{
+									"key": "max_price",
+									"value": "",
+									"description": "Precio máximo"
+								},
+								{
+									"key": "in_stock",
+									"value": "",
+									"description": "Solo productos en stock (true/false)"
+								},
+								{
+									"key": "department_id",
+									"value": "",
+									"description": "ID de departamento para filtrar"
+								},
+								{
+									"key": "is_on_sale",
+									"value": "",
+									"description": "Solo productos en oferta (true/false)"
+								},
+								{
+									"key": "min_rating",
+									"value": "",
+									"description": "Calificación mínima"
+								}
+							]
+						},
+						"description": "Obtiene una lista de productos con filtros opcionales"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{productId}}",
+									"description": "ID único del producto"
+								}
+							]
+						},
+						"description": "Obtiene un producto específico por su ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Producto de ejemplo\",\n  \"description\": \"Descripción del producto de ejemplo\",\n  \"sku\": \"PROD-001\",\n  \"slug\": \"producto-ejemplo\",\n  \"price\": 29.99,\n  \"original_price\": 39.99,\n  \"category_id\": \"uuid-categoria\",\n  \"department_id\": \"uuid-departamento\",\n  \"brand\": \"Marca Ejemplo\",\n  \"unit\": \"unidad\",\n  \"images\": [\n    \"https://example.com/image1.jpg\",\n    \"https://example.com/image2.jpg\"\n  ],\n  \"stock\": 100,\n  \"min_stock\": 10,\n  \"weight\": 250.5,\n  \"weight_unit\": \"gramos\",\n  \"dimensions\": {\n    \"length\": 15.0,\n    \"width\": 10.0,\n    \"height\": 5.0\n  },\n  \"is_on_sale\": true,\n  \"discount\": 25.0,\n  \"tags\": [\"nuevo\", \"popular\", \"oferta\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products"
+							]
+						},
+						"description": "Crea un nuevo producto"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Producto actualizado\",\n  \"description\": \"Descripción actualizada del producto\",\n  \"price\": 34.99,\n  \"stock\": 150,\n  \"is_on_sale\": false,\n  \"discount\": null,\n  \"rating\": 4.5,\n  \"reviews\": 25,\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{productId}}",
+									"description": "ID único del producto a actualizar"
+								}
+							]
+						},
+						"description": "Actualiza un producto existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{productId}}",
+									"description": "ID único del producto a eliminar"
+								}
+							]
+						},
+						"description": "Elimina un producto"
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones CRUD básicas para productos"
+		},
+		{
+			"name": "Product Queries",
+			"item": [
+				{
+					"name": "Get Low Stock Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products/low-stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products",
+								"low-stock"
+							]
+						},
+						"description": "Obtiene productos con stock bajo (stock <= min_stock)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products on Sale",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products/on-sale?limit=10&offset=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products",
+								"on-sale"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de productos por página"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Número de productos a omitir"
+								}
+							]
+						},
+						"description": "Obtiene productos en oferta"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Department",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products/department/:departmentId?limit=10&offset=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products",
+								"department",
+								":departmentId"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de productos por página"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Número de productos a omitir"
+								}
+							],
+							"variable": [
+								{
+									"key": "departmentId",
+									"value": "{{departmentId}}",
+									"description": "ID único del departamento"
+								}
+							]
+						},
+						"description": "Obtiene productos por departamento"
+					},
+					"response": []
+				}
+			],
+			"description": "Consultas especializadas de productos"
+		},
+		{
+			"name": "Stock Management",
+			"item": [
+				{
+					"name": "Update Product Stock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 50\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product-service/products/:id/stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"products",
+								":id",
+								"stock"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{productId}}",
+									"description": "ID único del producto"
+								}
+							]
+						},
+						"description": "Actualiza el stock de un producto (puede ser positivo para agregar o negativo para reducir)"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión de inventario y stock"
+		},
+		{
+			"name": "Departments",
+			"item": [
+				{
+					"name": "List Departments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/departments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"departments"
+							]
+						},
+						"description": "Obtiene una lista de todos los departamentos"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Department by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/departments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"departments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{departmentId}}",
+									"description": "ID único del departamento"
+								}
+							]
+						},
+						"description": "Obtiene un departamento específico por su ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Department",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Departamento de ejemplo\",\n  \"description\": \"Descripción del departamento de ejemplo\",\n  \"slug\": \"departamento-ejemplo\",\n  \"icon\": \"shopping-cart\",\n  \"image\": \"https://example.com/department-image.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product-service/departments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"departments"
+							]
+						},
+						"description": "Crea un nuevo departamento"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Department",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Departamento actualizado\",\n  \"description\": \"Descripción actualizada del departamento\",\n  \"slug\": \"departamento-actualizado\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product-service/departments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"departments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{departmentId}}",
+									"description": "ID único del departamento a actualizar"
+								}
+							]
+						},
+						"description": "Actualiza un departamento existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Department",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/departments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"departments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{departmentId}}",
+									"description": "ID único del departamento a eliminar"
+								}
+							]
+						},
+						"description": "Elimina un departamento"
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones CRUD para departamentos"
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/categories?parent_id=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"categories"
+							],
+							"query": [
+								{
+									"key": "parent_id",
+									"value": "",
+									"description": "ID de la categoría padre para filtrar subcategorías (opcional)"
+								}
+							]
+						},
+						"description": "Obtiene una lista de todas las categorías o subcategorías de una categoría padre"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{categoryId}}",
+									"description": "ID único de la categoría"
+								}
+							]
+						},
+						"description": "Obtiene una categoría específica por su ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Categoría de ejemplo\",\n  \"slug\": \"categoria-ejemplo\",\n  \"description\": \"Descripción de la categoría de ejemplo\",\n  \"parent_id\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product-service/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"categories"
+							]
+						},
+						"description": "Crea una nueva categoría"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Categoría actualizada\",\n  \"slug\": \"categoria-actualizada\",\n  \"description\": \"Descripción actualizada de la categoría\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product-service/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{categoryId}}",
+									"description": "ID único de la categoría a actualizar"
+								}
+							]
+						},
+						"description": "Actualiza una categoría existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product-service/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product-service",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{categoryId}}",
+									"description": "ID único de la categoría a eliminar"
+								}
+							]
+						},
+						"description": "Elimina una categoría"
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones CRUD para categorías"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://your-api-gateway-url.amazonaws.com/dev",
+			"type": "string",
+			"description": "URL base del API Gateway de AWS"
+		},
+		{
+			"key": "productId",
+			"value": "example-product-uuid",
+			"type": "string",
+			"description": "ID de ejemplo de un producto para las pruebas"
+		},
+		{
+			"key": "departmentId",
+			"value": "example-department-uuid",
+			"type": "string",
+			"description": "ID de ejemplo de un departamento para las pruebas"
+		},
+		{
+			"key": "categoryId",
+			"value": "example-category-uuid",
+			"type": "string",
+			"description": "ID de ejemplo de una categoría para las pruebas"
+		}
+	]
+}
