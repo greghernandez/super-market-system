@@ -32,3 +32,8 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Bootstrap files and archives
+bootstrap
+bootstrap/
+*.zip
