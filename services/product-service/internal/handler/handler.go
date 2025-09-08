@@ -51,24 +51,46 @@ func (h *LambdaHandler) HandleRequest(request events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	// var data map[string]interface{}
+
+	// data = map[string]interface{}{
+	// 	"service": "product-service",
+	// 	"status":  "running",
+	// 	"method":  request.HTTPMethod,
+	// 	"path":    request.Path,
+	// 	"query":   strings.HasPrefix(request.Path, "/products/"),
+
+	// }
+
+	// return h.successResponse(http.StatusOK, data, headers), nil
+
+	// fmt.Println("Received request:", request.HTTPMethod, request.Path)
+
+	// func normalizeProductPath(path string) string {
+	// 	if path == "" {
+	// 		return "/products"
+	// 	}
+	// 	return "/products" + path
+	// }
+
 	switch {
-	case request.HTTPMethod == "GET" && request.Path == "/products":
+	case request.HTTPMethod == "GET" && request.Path == "/product-service/products":
 		return h.listProducts(request, headers)
-	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/products/"):
+	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/product-service/products/"):
 		return h.getProduct(request, headers)
-	case request.HTTPMethod == "POST" && request.Path == "/products":
+	case request.HTTPMethod == "POST" && request.Path == "/product-service/products":
 		return h.createProduct(request, headers)
-	case request.HTTPMethod == "PUT" && strings.HasPrefix(request.Path, "/products/"):
+	case request.HTTPMethod == "PUT" && strings.HasPrefix(request.Path, "/product-service/products/"):
 		return h.updateProduct(request, headers)
-	case request.HTTPMethod == "DELETE" && strings.HasPrefix(request.Path, "/products/"):
+	case request.HTTPMethod == "DELETE" && strings.HasPrefix(request.Path, "/product-service/products/"):
 		return h.deleteProduct(request, headers)
-	case request.HTTPMethod == "GET" && request.Path == "/products/low-stock":
+	case request.HTTPMethod == "GET" && request.Path == "/product-service/products/low-stock":
 		return h.getLowStockProducts(request, headers)
-	case request.HTTPMethod == "POST" && strings.HasPrefix(request.Path, "/products/") && strings.HasSuffix(request.Path, "/stock"):
+	case request.HTTPMethod == "POST" && strings.HasPrefix(request.Path, "/product-service/products/") && strings.HasSuffix(request.Path, "/stock"):
 		return h.updateStock(request, headers)
-	case request.HTTPMethod == "GET" && request.Path == "/products/on-sale":
+	case request.HTTPMethod == "GET" && request.Path == "/product-service/products/on-sale":
 		return h.getProductsOnSale(request, headers)
-	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/products/department/"):
+	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/product-service/products/department/"):
 		return h.getProductsByDepartment(request, headers)
 	default:
 		return h.errorResponse(http.StatusNotFound, "Route not found", headers), nil
