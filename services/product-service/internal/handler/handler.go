@@ -15,8 +15,10 @@ import (
 )
 
 type LambdaHandler struct {
-	productService *service.ProductService
-	validator      *validator.Validate
+	productService    *service.ProductService
+	departmentService *service.DepartmentService
+	categoryService   *service.CategoryService
+	validator         *validator.Validate
 }
 
 func NewLambdaHandler() *LambdaHandler {
@@ -26,11 +28,15 @@ func NewLambdaHandler() *LambdaHandler {
 	}
 
 	productService := service.NewProductService(repo)
+	departmentService := service.NewDepartmentService(repo)
+	categoryService := service.NewCategoryService(repo)
 	validator := validator.New()
 
 	return &LambdaHandler{
-		productService: productService,
-		validator:      validator,
+		productService:    productService,
+		departmentService: departmentService,
+		categoryService:   categoryService,
+		validator:         validator,
 	}
 }
 
@@ -51,29 +57,8 @@ func (h *LambdaHandler) HandleRequest(request events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	// var data map[string]interface{}
-
-	// data = map[string]interface{}{
-	// 	"service": "product-service",
-	// 	"status":  "running",
-	// 	"method":  request.HTTPMethod,
-	// 	"path":    request.Path,
-	// 	"query":   strings.HasPrefix(request.Path, "/products/"),
-
-	// }
-
-	// return h.successResponse(http.StatusOK, data, headers), nil
-
-	// fmt.Println("Received request:", request.HTTPMethod, request.Path)
-
-	// func normalizeProductPath(path string) string {
-	// 	if path == "" {
-	// 		return "/products"
-	// 	}
-	// 	return "/products" + path
-	// }
-
 	switch {
+	// Product routes
 	case request.HTTPMethod == "GET" && request.Path == "/product-service/products":
 		return h.listProducts(request, headers)
 	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/product-service/products/"):
@@ -92,6 +77,31 @@ func (h *LambdaHandler) HandleRequest(request events.APIGatewayProxyRequest) (ev
 		return h.getProductsOnSale(request, headers)
 	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/product-service/products/department/"):
 		return h.getProductsByDepartment(request, headers)
+	
+	// Department routes
+	case request.HTTPMethod == "GET" && request.Path == "/product-service/departments":
+		return h.listDepartments(request, headers)
+	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/product-service/departments/"):
+		return h.getDepartment(request, headers)
+	case request.HTTPMethod == "POST" && request.Path == "/product-service/departments":
+		return h.createDepartment(request, headers)
+	case request.HTTPMethod == "PUT" && strings.HasPrefix(request.Path, "/product-service/departments/"):
+		return h.updateDepartment(request, headers)
+	case request.HTTPMethod == "DELETE" && strings.HasPrefix(request.Path, "/product-service/departments/"):
+		return h.deleteDepartment(request, headers)
+	
+	// Category routes
+	case request.HTTPMethod == "GET" && request.Path == "/product-service/categories":
+		return h.listCategories(request, headers)
+	case request.HTTPMethod == "GET" && strings.HasPrefix(request.Path, "/product-service/categories/"):
+		return h.getCategory(request, headers)
+	case request.HTTPMethod == "POST" && request.Path == "/product-service/categories":
+		return h.createCategory(request, headers)
+	case request.HTTPMethod == "PUT" && strings.HasPrefix(request.Path, "/product-service/categories/"):
+		return h.updateCategory(request, headers)
+	case request.HTTPMethod == "DELETE" && strings.HasPrefix(request.Path, "/product-service/categories/"):
+		return h.deleteCategory(request, headers)
+	
 	default:
 		return h.errorResponse(http.StatusNotFound, "Route not found", headers), nil
 	}
@@ -355,18 +365,208 @@ func (h *LambdaHandler) errorResponse(statusCode int, message string, headers ma
 }
 
 func extractIDFromPath(path string) string {
+	// Remove leading and trailing slashes and split by "/"
 	parts := strings.Split(strings.Trim(path, "/"), "/")
-	if len(parts) >= 2 {
-		return parts[1]
+	// For paths like "/product-service/products/123" or "/product-service/departments/456"
+	// We want to extract the last part which is the ID
+	if len(parts) >= 3 {
+		return parts[len(parts)-1]
 	}
 	return ""
 }
 
 func extractDepartmentIDFromPath(path string) string {
-	// Path format: /products/department/{departmentID}
+	// Path format: /product-service/products/department/{departmentID}
 	parts := strings.Split(strings.Trim(path, "/"), "/")
-	if len(parts) >= 3 && parts[1] == "department" {
-		return parts[2]
+	if len(parts) >= 4 && parts[2] == "department" {
+		return parts[3]
 	}
 	return ""
+}
+
+// Department handlers
+
+func (h *LambdaHandler) listDepartments(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	departments, err := h.departmentService.ListDepartments()
+	if err != nil {
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusOK, departments, headers), nil
+}
+
+func (h *LambdaHandler) getDepartment(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	id := extractIDFromPath(request.Path)
+	if id == "" {
+		return h.errorResponse(http.StatusBadRequest, "Department ID is required", headers), nil
+	}
+
+	department, err := h.departmentService.GetDepartment(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return h.errorResponse(http.StatusNotFound, "Department not found", headers), nil
+		}
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusOK, department, headers), nil
+}
+
+func (h *LambdaHandler) createDepartment(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	var createRequest models.CreateDepartmentRequest
+
+	if err := json.Unmarshal([]byte(request.Body), &createRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, "Invalid JSON payload", headers), nil
+	}
+
+	if err := h.validator.Struct(&createRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, fmt.Sprintf("Validation error: %s", err.Error()), headers), nil
+	}
+
+	department, err := h.departmentService.CreateDepartment(&createRequest)
+	if err != nil {
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusCreated, department, headers), nil
+}
+
+func (h *LambdaHandler) updateDepartment(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	id := extractIDFromPath(request.Path)
+	if id == "" {
+		return h.errorResponse(http.StatusBadRequest, "Department ID is required", headers), nil
+	}
+
+	var updateRequest models.UpdateDepartmentRequest
+
+	if err := json.Unmarshal([]byte(request.Body), &updateRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, "Invalid JSON payload", headers), nil
+	}
+
+	if err := h.validator.Struct(&updateRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, fmt.Sprintf("Validation error: %s", err.Error()), headers), nil
+	}
+
+	department, err := h.departmentService.UpdateDepartment(id, &updateRequest)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return h.errorResponse(http.StatusNotFound, "Department not found", headers), nil
+		}
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusOK, department, headers), nil
+}
+
+func (h *LambdaHandler) deleteDepartment(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	id := extractIDFromPath(request.Path)
+	if id == "" {
+		return h.errorResponse(http.StatusBadRequest, "Department ID is required", headers), nil
+	}
+
+	err := h.departmentService.DeleteDepartment(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return h.errorResponse(http.StatusNotFound, "Department not found", headers), nil
+		}
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusNoContent, nil, headers), nil
+}
+
+// Category handlers
+
+func (h *LambdaHandler) listCategories(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	var parentID *string
+	if parentIDParam := request.QueryStringParameters["parent_id"]; parentIDParam != "" {
+		parentID = &parentIDParam
+	}
+
+	categories, err := h.categoryService.ListCategories(parentID)
+	if err != nil {
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusOK, categories, headers), nil
+}
+
+func (h *LambdaHandler) getCategory(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	id := extractIDFromPath(request.Path)
+	if id == "" {
+		return h.errorResponse(http.StatusBadRequest, "Category ID is required", headers), nil
+	}
+
+	category, err := h.categoryService.GetCategory(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return h.errorResponse(http.StatusNotFound, "Category not found", headers), nil
+		}
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusOK, category, headers), nil
+}
+
+func (h *LambdaHandler) createCategory(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	var createRequest models.CreateCategoryRequest
+
+	if err := json.Unmarshal([]byte(request.Body), &createRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, "Invalid JSON payload", headers), nil
+	}
+
+	if err := h.validator.Struct(&createRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, fmt.Sprintf("Validation error: %s", err.Error()), headers), nil
+	}
+
+	category, err := h.categoryService.CreateCategory(&createRequest)
+	if err != nil {
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusCreated, category, headers), nil
+}
+
+func (h *LambdaHandler) updateCategory(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	id := extractIDFromPath(request.Path)
+	if id == "" {
+		return h.errorResponse(http.StatusBadRequest, "Category ID is required", headers), nil
+	}
+
+	var updateRequest models.UpdateCategoryRequest
+
+	if err := json.Unmarshal([]byte(request.Body), &updateRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, "Invalid JSON payload", headers), nil
+	}
+
+	if err := h.validator.Struct(&updateRequest); err != nil {
+		return h.errorResponse(http.StatusBadRequest, fmt.Sprintf("Validation error: %s", err.Error()), headers), nil
+	}
+
+	category, err := h.categoryService.UpdateCategory(id, &updateRequest)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return h.errorResponse(http.StatusNotFound, "Category not found", headers), nil
+		}
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusOK, category, headers), nil
+}
+
+func (h *LambdaHandler) deleteCategory(request events.APIGatewayProxyRequest, headers map[string]string) (events.APIGatewayProxyResponse, error) {
+	id := extractIDFromPath(request.Path)
+	if id == "" {
+		return h.errorResponse(http.StatusBadRequest, "Category ID is required", headers), nil
+	}
+
+	err := h.categoryService.DeleteCategory(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return h.errorResponse(http.StatusNotFound, "Category not found", headers), nil
+		}
+		return h.errorResponse(http.StatusInternalServerError, err.Error(), headers), nil
+	}
+
+	return h.successResponse(http.StatusNoContent, nil, headers), nil
 }

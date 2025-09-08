@@ -24,6 +24,20 @@ type ProductRepository interface {
 	DeleteProduct(id string) error
 	UpdateStock(id string, quantity int) error
 	GetLowStockProducts() ([]models.Product, error)
+	
+	// Department methods
+	GetDepartment(id string) (*models.Department, error)
+	ListDepartments() ([]models.Department, error)
+	CreateDepartment(department *models.Department) error
+	UpdateDepartment(id string, updates *models.UpdateDepartmentRequest) (*models.Department, error)
+	DeleteDepartment(id string) error
+	
+	// Category methods
+	GetCategory(id string) (*models.Category, error)
+	ListCategories(parentID *string) ([]models.Category, error)
+	CreateCategory(category *models.Category) error
+	UpdateCategory(id string, updates *models.UpdateCategoryRequest) (*models.Category, error)
+	DeleteCategory(id string) error
 }
 
 type DynamoDBRepository struct {
